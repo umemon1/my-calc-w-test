@@ -1,0 +1,33 @@
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    parallelism: 4  # Enable 4-way parallelism; adjust as needed
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Split and run tests in parallel
+          command: |
+            TESTFILES=$(circleci tests glob "src/**/*.test.js" | circleci tests split --split-by=timings)
+            npx jest $TESTFILES --passWithNoTests
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-node
+    # - deploy:
+    #     requires:
+    #       - test-node
